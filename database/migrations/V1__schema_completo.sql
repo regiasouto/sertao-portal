@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS consultas (
     especialidade_id INT NOT NULL,
     data_consulta DATE NOT NULL,
     horario TIME NOT NULL,
-    status ENUM('Agendado', 'Realizado', 'Cancelado') DEFAULT 'Agendado',
+    status ENUM('Agendado', 'Realizado', 'Cancelado', 'Em atendimento', 'Confirmado') DEFAULT 'Agendado',
     FOREIGN KEY (paciente_id) REFERENCES pacientes(id),
     FOREIGN KEY (medico_id) REFERENCES medicos(id),
     FOREIGN KEY (especialidade_id) REFERENCES especialidades(id)
