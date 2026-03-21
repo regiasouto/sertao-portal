@@ -147,7 +147,7 @@ IF v_status IS NULL THEN
         ROLLBACK;
         SET p_sucesso = FALSE;
         SET p_mensagem = 'Consulta ja esta cancelada!';
-    ELSEIF v_status = 'Realizado' THEN
+    ELSEIF v_status = ('Realizado', 'Em atendimento') THEN
         ROLLBACK;
         SET p_sucesso = FALSE;
         SET p_mensagem = 'Nao pode cancelar consulta ja realizada!';
@@ -173,6 +173,7 @@ CREATE PROCEDURE sp_marcar_realizado(
 )
 BEGIN
     DECLARE v_data DATE;
+	DECLARE v_status VARCHAR(20);
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -183,7 +184,7 @@ BEGIN
 
     START TRANSACTION;
 
-    SELECT data_consulta INTO v_data 
+    SELECT data_consulta, status INTO v_data, v_status 
     FROM consultas 
     WHERE id = p_consulta_id;
     
@@ -191,6 +192,14 @@ BEGIN
         ROLLBACK;
         SET p_sucesso = FALSE;
         SET p_mensagem = 'Consulta nao encontrada!';
+    ELSE IF v_status = 'Realizado' THEN
+		ROLLBACK;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Consulta ja esta marcada como realizada';
+    ELSEIF v_status = 'Cancelado' THEN
+		ROLLBACK;
+        SET p_sucesso = FALSE;
+        SET p_mensagem = 'Nao pode marcar como realizada uma consulta cancelada!';
     ELSEIF v_data > CURDATE() THEN
         ROLLBACK;
         SET p_sucesso = FALSE;
@@ -298,7 +307,7 @@ DELIMITER //
 CREATE PROCEDURE sp_relatorio_consultas(
     IN p_data_inicio DATE,
     IN p_data_fim DATE,
-    IN p_status VARCHAR(20) -- 'Todos', 'Agendado', 'Realizado', 'Cancelado'
+    IN p_status VARCHAR(20) -- 'Todos', 'Agendado', 'Realizado', 'Cancelado', 'Em atendimento', 'Confirmado'
 )
 BEGIN
     IF p_status = 'Todos' THEN
